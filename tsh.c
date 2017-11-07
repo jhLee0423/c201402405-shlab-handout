@@ -1,6 +1,8 @@
 /* 
  * tsh - A tiny shell program with job control
  * 
+ * 201402405 이지혜
+ *
  * <Put your name and login ID here>
  */
 #include <stdio.h>
