@@ -169,12 +169,43 @@ int main(int argc, char **argv)
  */
 void eval(char *cmdline) 
 {
+	char *argv[MAXARGS]; // command 저장
+
+	pid_t pid;
+	int bg = parseline(cmdline, argv);
+	
+	if(!builtin_cmd(argv)){
+		if((pid = fork()) == 0){ /* fork()로자식 생성시, return된 pid가 									0이면 자식을 의미한다*/
+			if(execve(argv[0], argv, environ) < 0){
+				printf("%s : Command not found.\n", argv[0]);
+				exit(0);
+			}
+		}
+
+		if(!bg){
+			int status;
+			if(waitpid(pid, &status, 0) < 0){
+				unix_error("waitfg : waitpid error");}
+		}
+		else{
+			addjob(jobs, pid, BG, cmdline);
+			printf("(%d) (%d) %s", pid2jid(pid), pid, cmdline);
+		}
+	}
 	return;
 }
 
 int builtin_cmd(char **argv)
 {
-	return 0;
+	char *cmd = argv[0];
+	if(!strcmp(cmd, "quit")){ // parsing된 명령어가 "quit"면
+		exit(0); // exit(0) 호출
+	}
+	if(!strcmp(cmd,"jobs")){
+		listjobs(jobs,1);
+		return 1;
+	}
+	return 0; 
 }
 
 void waitfg(pid_t pid, int output_fd)
