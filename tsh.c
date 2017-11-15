@@ -183,9 +183,12 @@ void eval(char *cmdline)
 		}
 
 		if(!bg){
+			addjob(jobs, pid, FG, cmdline);
 			int status;
 			if(waitpid(pid, &status, 0) < 0){
-				unix_error("waitfg : waitpid error");}
+				unix_error("waitfg : waitpid error");
+			}
+			deletejob(jobs, pid);
 		}
 		else{
 			addjob(jobs, pid, BG, cmdline);
@@ -198,11 +201,11 @@ void eval(char *cmdline)
 int builtin_cmd(char **argv)
 {
 	char *cmd = argv[0];
-	if(!strcmp(cmd, "quit")){ // parsing된 명령어가 "quit"면
+	if(!strcmp(cmd, "quit")){ // parsing된 명령어가 'quit'면
 		exit(0); // exit(0) 호출
 	}
-	if(!strcmp(cmd,"jobs")){
-		listjobs(jobs,1);
+	if(!strcmp(cmd,"jobs")){ // parsing된 명령어가 'jobs'면
+		listjobs(jobs,1); // listjobs() 호출
 		return 1;
 	}
 	return 0; 
